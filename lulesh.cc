@@ -159,6 +159,10 @@ Additional BSD Notice
 # include <omp.h>
 #endif
 
+#if defined(HPX)
+# include <hpx/hpx_main.hpp>
+#endif
+
 #include "lulesh.h"
 
 /* Work Routines */

@@ -5,12 +5,12 @@ SHELL = /bin/sh
 
 LULESH_EXEC = lulesh2.0
 
-MPI_INC = /opt/local/include/openmpi
-MPI_LIB = /opt/local/lib
+# MPI_INC = /opt/local/include/openmpi
+# MPI_LIB = /opt/local/lib
 
-SERCXX = g++ -DUSE_MPI=0
+SERCXX = clang++ -DUSE_MPI=0
 MPICXX = mpig++ -DUSE_MPI=1
-CXX = $(MPICXX)
+CXX = $(SERCXX)
 
 SOURCES2.0 = \
 	lulesh.cc \
@@ -20,9 +20,13 @@ SOURCES2.0 = \
 	lulesh-init.cc
 OBJECTS2.0 = $(SOURCES2.0:.cc=.o)
 
+hpx_install_lib = $(HPX_LIB_PATH)
+hpx_install_include = $(HPX_INCLUDE_PATH)
+llvm_install_include = $(OMP_INCLUDE_PATH)
+
 #Default build suggestions with OpenMP for g++
-CXXFLAGS = -g -O3 -fopenmp -I. -Wall
-LDFLAGS = -g -O3 -fopenmp
+CXXFLAGS = -g -O3 -fopenmp -I. -Wall -std=c++17 -DHPX -I$(hpx_install_include) -I$(llvm_install_include)
+LDFLAGS = -g -O3 -fopenmp -std=c++17 -L$(hpx_install_lib) -Wl,-rpath=$(hpx_install_lib)
 
 #Below are reasonable default flags for a serial build
 #CXXFLAGS = -g -O3 -I. -Wall
@@ -50,7 +54,7 @@ all: $(LULESH_EXEC)
 
 $(LULESH_EXEC): $(OBJECTS2.0)
 	@echo "Linking"
-	$(CXX) $(OBJECTS2.0) $(LDFLAGS) -lm -o $@
+	$(CXX) $(OBJECTS2.0) $(LDFLAGS) -lhpx_init -lhpx -lhpx_core -lc++ -lomp -lm -o $@
 
 clean:
 	/bin/rm -f *.o *~ $(OBJECTS) $(LULESH_EXEC)
